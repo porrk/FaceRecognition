@@ -1,98 +1,80 @@
-/*
- * @Author: Liu zhenyu
- * @Description: 主程序（重构版）
- *               流程：1. 从 network_camera_receiver 取最新帧；
- *                     2. 调用 libfacedetection 进行人脸检测；
- *                     3. 绘制并显示检测结果。
- *               libfacedetection 以独立动态库形式链接。
- */
+#include <iostream>
+#include <memory>
+#include <string>
+#include <vector>
 
 #include <opencv2/opencv.hpp>
-#include <iostream>
-#include <string>
 
+#include "face_pipeline/face_embedder.h"
+#include "face_pipeline/face_pipeline.h"
+#include "face_pipeline/result_sink.h"
 #include "network_camera_receiver.h"
-#include "facedetectcnn.h"
 
-// 将 libfacedetection 的检测结果绘制到帧上
-// pResults[0] = 人脸数量；其后每张脸占 FACEDETECTION_RESULT_STRIDE_SHORTS 个 short
-static void drawFaces(cv::Mat& frame, const int* pResults) {
-    if (!pResults) return;
-    int faces = pResults[0];
+namespace {
 
-    for (int i = 0; i < faces; i++) {
-        // 每个人脸结果占用 FACEDETECTION_RESULT_STRIDE_SHORTS(=16) 个 short：
-        //   p[0]=置信度(score*100), p[1..4]=x/y/w/h,
-        //   p[5..14]=5个关键点(x,y交替), p[15]=对齐填充
-        short* p = ((short*)(pResults + 1)) + FACEDETECTION_RESULT_STRIDE_SHORTS * i;
-
-        int confidence = p[0];
-        int x = p[1];
-        int y = p[2];
-        int w = p[3];
-        int h = p[4];
-
-        // 只显示置信度大于 60 的结果以过滤误检
-        if (confidence > 60) {
-            cv::rectangle(frame, cv::Rect(x, y, w, h), cv::Scalar(0, 255, 0), 2);
-
-            // 置信度标注
-            cv::putText(frame, std::to_string(confidence),
-                        cv::Point(x, y - 5), cv::FONT_HERSHEY_SIMPLEX,
-                        0.5, cv::Scalar(0, 255, 0), 1);
-
-            // 五个特征点
-            cv::circle(frame, cv::Point(p[5],  p[6]),  2, cv::Scalar(255, 0, 0),   -1);
-            cv::circle(frame, cv::Point(p[7],  p[8]),  2, cv::Scalar(0, 0, 255),   -1);
-            cv::circle(frame, cv::Point(p[9],  p[10]), 2, cv::Scalar(0, 255, 0),   -1);
-            cv::circle(frame, cv::Point(p[11], p[12]), 2, cv::Scalar(255, 0, 255), -1);
-            cv::circle(frame, cv::Point(p[13], p[14]), 2, cv::Scalar(0, 255, 255), -1);
+void drawTracks(cv::Mat& frame, const std::vector<face_pipeline::TrackedFace>& tracks) {
+    for (const face_pipeline::TrackedFace& track : tracks) {
+        const face_pipeline::FaceObservation& face = track.observation;
+        cv::rectangle(frame, face.bbox, cv::Scalar(0, 255, 0), 2);
+        cv::putText(frame, "track " + std::to_string(track.track_id),
+                    cv::Point(face.bbox.x, std::max(15, face.bbox.y - 5)),
+                    cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 1);
+        for (const cv::Point2f& landmark : face.landmarks) {
+            cv::circle(frame, landmark, 2, cv::Scalar(0, 0, 255), -1);
         }
     }
 }
 
-int main() {
-    // 替换为你查到的视频流宿主机 IP
-    std::string host_ip = "127.0.0.1";
+}  // namespace
 
-    // 1) 接收端：仅负责抓帧
-    NetworkCameraReceiver receiver(host_ip, 5000);
-    if (!receiver.connect()) {
-        std::cerr << "连接视频流失败，退出。" << std::endl;
-        return -1;
-    }
-    receiver.start();  // 启动后台抓帧线程
+int main(int argc, char** argv) {
+    const std::string model_path = argc > 1
+        ? argv[1]
+        : std::string(SOURCE_ROOT) + "/models/face_recognition_sface_2021dec.onnx";
 
-    // libfacedetection 结果缓冲区（大小由库定义的宏决定）
-    unsigned char* pBuffer = new unsigned char[FACEDETECTION_RESULT_BUFFER_SIZE];
+    try {
+        std::unique_ptr<face_pipeline::FaceEmbedder> embedder(
+            new face_pipeline::SFaceEmbedder(model_path));
+        std::unique_ptr<face_pipeline::ResultSink> sink(
+            new face_pipeline::LoggingResultSink(std::cout));
+        face_pipeline::FacePipeline pipeline(std::move(embedder), std::move(sink));
 
-    const std::string window_name = "Face Detection";
-    cv::namedWindow(window_name, cv::WINDOW_AUTOSIZE);
+        NetworkCameraReceiver receiver("127.0.0.1", 5000);
+        if (!receiver.connect()) return 1;
 
-    std::cout << "人脸检测已启动，按 ESC 退出..." << std::endl;
+        pipeline.start();
+        receiver.start();
 
-    cv::Mat frame;
-    while (true) {
-        // ---- 步骤 1：接收最新帧 ----
-        if (receiver.getLatestFrame(frame) && !frame.empty()) {
-            // ---- 步骤 2：调用 libfacedetection 检测 ----
-            // 注意：OpenCV 采集到的帧为 BGR，正好符合 facedetect_cnn 的输入要求
-            int* pResults = facedetect_cnn(pBuffer,
-                                           frame.data,
-                                           frame.cols,
-                                           frame.rows,
-                                           (int)frame.step);
+        const std::string window_name = "Face Detection and Features";
+        cv::namedWindow(window_name, cv::WINDOW_AUTOSIZE);
+        std::cout << "Face pipeline started; press ESC to exit." << std::endl;
 
-            // ---- 步骤 3：显示检测结果 ----
-            drawFaces(frame, pResults);
-            cv::imshow(window_name, frame);
+        NetworkFrame network_frame;
+        while (true) {
+            if (receiver.getLatestFrame(network_frame) && !network_frame.image.empty()) {
+                face_pipeline::FramePacket packet;
+                packet.frame = network_frame.image;
+                packet.frame_id = network_frame.frame_id;
+                packet.captured_at = network_frame.captured_at;
+                packet.captured_at_unix_ms = network_frame.captured_at_unix_ms;
+                pipeline.submit(packet);
+
+                cv::Mat display = network_frame.image.clone();
+                drawTracks(display, pipeline.latestTracks());
+                cv::imshow(window_name, display);
+            }
+            if (cv::waitKey(30) == 27) break;
         }
 
-        if (cv::waitKey(30) == 27) break;  // ESC 退出
+        receiver.stop();
+        pipeline.stop();
+        cv::destroyAllWindows();
+    } catch (const cv::Exception& error) {
+        std::cerr << "OpenCV initialization failed: " << error.what() << std::endl;
+        return 1;
+    } catch (const std::exception& error) {
+        std::cerr << "Initialization failed: " << error.what() << std::endl;
+        return 1;
     }
-
-    receiver.stop();
-    delete[] pBuffer;
-    cv::destroyAllWindows();
     return 0;
 }

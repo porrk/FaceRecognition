@@ -57,17 +57,31 @@ void NetworkCameraReceiver::captureLoop() {
             std::lock_guard<std::mutex> lock(mtx);
             // 仅保留最新一帧，旧帧直接丢弃
             frame.copyTo(latest_frame);
+            ++latest_frame_id;
+            latest_captured_at = std::chrono::steady_clock::now();
+            latest_captured_at_unix_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::system_clock::now().time_since_epoch()).count();
         }
         has_new_frame.store(true);
     }
 }
 
 bool NetworkCameraReceiver::getLatestFrame(cv::Mat& out) {
+    NetworkFrame frame;
+    if (!getLatestFrame(frame)) return false;
+    out = frame.image;
+    return true;
+}
+
+bool NetworkCameraReceiver::getLatestFrame(NetworkFrame& out) {
     if (!has_new_frame.load()) return false;
     // 先清标记：若在此期间后台又写入新帧，标记会被再次置 true，下一轮可取到
     has_new_frame.store(false);
     std::lock_guard<std::mutex> lock(mtx);
     if (latest_frame.empty()) return false;
-    latest_frame.copyTo(out);
+    latest_frame.copyTo(out.image);
+    out.frame_id = latest_frame_id;
+    out.captured_at = latest_captured_at;
+    out.captured_at_unix_ms = latest_captured_at_unix_ms;
     return true;
 }

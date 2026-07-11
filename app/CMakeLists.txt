@@ -13,6 +13,7 @@ add_executable(face_detection_app
 target_link_libraries(face_detection_app PRIVATE
     facedetection
     network_camera_receiver
+    face_pipeline
     ${OpenCV_LIBS}
 )
 

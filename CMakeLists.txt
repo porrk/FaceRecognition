@@ -13,6 +13,17 @@ endif()
 # 默认导出 compile_commands.json（便于 IDE/clangd 索引）
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+set(SFACE_MODEL "${CMAKE_SOURCE_DIR}/models/face_recognition_sface_2021dec.onnx")
+set(SFACE_MODEL_SHA256 "0ba9fbfa01b5270c96627c4ef784da859931e02f04419c829e83484087c34e79")
+if(EXISTS "${SFACE_MODEL}")
+    file(SHA256 "${SFACE_MODEL}" SFACE_MODEL_ACTUAL_SHA256)
+    if(NOT SFACE_MODEL_ACTUAL_SHA256 STREQUAL SFACE_MODEL_SHA256)
+        message(FATAL_ERROR "Bundled SFace model checksum mismatch")
+    endif()
+else()
+    message(FATAL_ERROR "Missing bundled SFace model: ${SFACE_MODEL}")
+endif()
+
 # ============================================================================
 # 0. SIMD 加速选项（作用于 libfacedetection 动态库）
 #    X86/X64 CPU:  cmake -DENABLE_AVX2=ON 或 -DENABLE_AVX512=ON
@@ -64,4 +75,10 @@ message(STATUS "Threads library enabled.")
 # ============================================================================
 add_subdirectory(libfacedetection)
 add_subdirectory(network_camera_receiver)
+add_subdirectory(face_pipeline)
 add_subdirectory(app)
+
+include(CTest)
+if(BUILD_TESTING)
+    add_subdirectory(tests)
+endif()

@@ -13,6 +13,15 @@
 #include <thread>
 #include <mutex>
 #include <atomic>
+#include <chrono>
+#include <cstdint>
+
+struct NetworkFrame {
+    cv::Mat image;
+    std::uint64_t frame_id = 0;
+    std::chrono::steady_clock::time_point captured_at;
+    std::int64_t captured_at_unix_ms = 0;
+};
 
 class NetworkCameraReceiver {
 public:
@@ -27,6 +36,7 @@ public:
     void stop();
     // 取最新帧（深拷贝到 out）；自上次取帧后若无新帧则返回 false
     bool getLatestFrame(cv::Mat& out);
+    bool getLatestFrame(NetworkFrame& out);
     // 视频流是否已打开
     bool isOpened() const;
 
@@ -40,6 +50,9 @@ private:
     std::thread capture_thread;
     std::mutex mtx;                 // 保护 latest_frame
     cv::Mat latest_frame;           // 最新一帧
+    std::uint64_t latest_frame_id = 0;
+    std::chrono::steady_clock::time_point latest_captured_at;
+    std::int64_t latest_captured_at_unix_ms = 0;
     std::atomic<bool> has_new_frame{false};
     std::atomic<bool> running{false};
 };

@@ -1,6 +1,6 @@
 # FaceRecognition — 实时网络视频流人脸检测
 
-基于 CNN 的人脸检测应用：从 HTTP 网络视频流实时抓帧，调用 `libfacedetection` 进行人脸检测与关键点定位，并在窗口中绘制结果。
+基于 CNN 的人脸检测与特征提取应用：从 HTTP 网络视频流实时抓帧，经运动粗筛后检测人脸与关键点，完成对齐、SFace 特征提取和 IoU 跟踪。
 
 - 作者：Liu zhenyu
 - 语言标准：C++11
@@ -27,23 +27,30 @@ FaceRecognition/
 │   ├── CMakeLists.txt
 │   ├── include/network_camera_receiver.h
 │   └── src/network_camera_receiver.cpp
+├── face_pipeline/                  # 运动检测、跟踪、对齐、特征与消息接口
+├── models/                         # 固定版本 SFace ONNX、许可证与校验信息
+├── tests/                          # CTest 离线单元/模型测试
 └── resources/                      # 测试资源
 ```
 
-### 三个子模块
+### 主要模块
 
 | 模块 | 类型 | 职责 |
 |------|------|------|
 | `libfacedetection` | SHARED 动态库 | CNN 人脸检测（含 5 个关键点），仅导出 `facedetect_cnn` |
 | `network_camera_receiver` | STATIC 静态库 | 后台线程从 HTTP 视频流持续抓取最新帧，不包含检测逻辑 |
-| `app` | 可执行程序 `face_detection_app` | 编排：拉帧 → 检测 → 绘制 → 显示 |
+| `face_pipeline` | STATIC 静态库 | 运动粗筛、检测、IoU 跟踪、对齐、SFace 特征和结果接口 |
+| `app` | 可执行程序 `face_detection_app` | 拉帧、提交任务并显示最新跟踪结果 |
 
 ---
 
 ## 功能特性
 
-- **实时检测**：后台线程抓帧，主线程检测显示，互不阻塞。
+- **低延迟流水线**：采集与检测分线程，容量为 1 的 latest-wins mailbox 不积压旧帧。
+- **运动粗筛**：有运动时触发检测；有人脸时每秒保活，无 track 时每 5 秒兜底扫描。
 - **CNN 人脸检测**：输出人脸框 + 置信度 + 5 个面部关键点（双眼、鼻尖、嘴角）。
+- **特征提取**：五点相似变换对齐后，由 OpenCV SFace 输出 L2 归一化的 128 维向量。
+- **简单跟踪**：IoU 分配 `track_id`，每个 track 仅首次通过 `ResultSink` 发布。
 - **SIMD 加速**：支持 AVX2 / AVX512 / NEON，CMake 选项一键开关并自动配置编译标志。
 - **OpenMP 加速**：卷积运算可选多线程并行。
 - **置信度过滤**：仅显示置信度 > 60 的人脸，降低误检。
@@ -75,9 +82,10 @@ sudo apt-get install build-essential cmake libopencv-dev
 cd FaceRecognition
 cmake -S . -B build -DENABLE_AVX2=ON
 cmake --build build -j
+ctest --test-dir build --output-on-failure
 ```
 
-生成的可执行文件：`build/app/face_detection_app`
+生成的可执行文件：`build/app/face_detection_app`。配置阶段会校验 `models/face_recognition_sface_2021dec.onnx` 的 SHA-256。
 
 ### 2. SIMD 加速选项
 
@@ -157,7 +165,7 @@ std::string host_ip = "127.0.0.1";  // 改为推流主机 IP
 ./build/app/face_detection_app
 ```
 
-窗口将实时显示检测到的人脸框、置信度及 5 个关键点。按 **ESC** 退出。
+也可把兼容的 SFace 模型路径作为第一个参数传入。窗口显示人脸框、关键点和 `track_id`，按 **ESC** 退出。新 track 首次提取成功时输出一行 `face_feature` 日志，只记录元数据和特征维度，不打印完整向量。
 
 ---
 
@@ -190,17 +198,11 @@ short* p = ((short*)(pResults + 1)) + FACEDETECTION_RESULT_STRIDE_SHORTS * i;
 ## 项目架构流程
 
 ```
-┌─────────────────────┐   最新帧    ┌──────────────────────┐
-│ network_camera_      │ ─────────> │ app (main.cpp)        │
-│ receiver (STATIC)    │  getLatest │  ┌──────────────────┐ │
-│  后台线程抓帧         │   Frame()  │  │ facedetect_cnn() │ │
-└─────────────────────┘            │  │   (libfacedetect)│ │
-        ▲                          │  └────────┬─────────┘ │
-        │ HTTP MJPEG               │           v           │
-        │ /video                   │     绘制框/关键点/置信度 │
-┌───────┴──────────────┐           │     cv::imshow        │
-│ 推流端 (Flask/摄像头) │           └───────────────────────┘
-└──────────────────────┘
+HTTP MJPEG → 抓帧线程 → 主线程运动粗筛 → latest-wins mailbox
+                                      ↓
+                         检测 worker：人脸检测 → IoU 跟踪
+                                      ↓（仅未发布 track）
+                              五点对齐 → SFace → ResultSink
 ```
 
 ---
