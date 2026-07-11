@@ -1,0 +1,69 @@
+# --- CMake ---
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CMakeUserPresets.json
+CMakePresets.json
+compile_commands.json
+*.cmake
+!**/CMakeLists.txt
+!**/CMakeFiles/*.cmake
+
+# --- Build output ---
+build/
+out/
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Ww][Ii][Nn]64/
+
+# --- Compiled objects & libraries ---
+*.o
+*.obj
+*.so
+*.so.*
+*.a
+*.lib
+*.dll
+*.dylib
+*.exe
+*.out
+*.app
+
+# --- Dependency / vendored build dirs ---
+libfacedetection/build/
+libfacedetection/*.o
+libfacedetection/*.a
+libfacedetection/*.so
+
+# --- IDE / Editor ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.sublime-*
+.cache/
+*.pdb
+*.ipdb
+*.iobj
+
+# --- Clangd / compile_commands ---
+.clangd/
+.cache/
+
+# --- Logs & temp ---
+*.log
+*.tmp
+*.bak
+*.orig
+
+# --- Doxygen ---
+docs/html/
+docs/latex/
