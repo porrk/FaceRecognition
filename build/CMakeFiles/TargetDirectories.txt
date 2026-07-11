@@ -1,0 +1,11 @@
+/home/hongshaorou/lzy_demo/facedetect/build/CMakeFiles/edit_cache.dir
+/home/hongshaorou/lzy_demo/facedetect/build/CMakeFiles/rebuild_cache.dir
+/home/hongshaorou/lzy_demo/facedetect/build/libfacedetection/CMakeFiles/facedetection.dir
+/home/hongshaorou/lzy_demo/facedetect/build/libfacedetection/CMakeFiles/edit_cache.dir
+/home/hongshaorou/lzy_demo/facedetect/build/libfacedetection/CMakeFiles/rebuild_cache.dir
+/home/hongshaorou/lzy_demo/facedetect/build/network_camera_receiver/CMakeFiles/network_camera_receiver.dir
+/home/hongshaorou/lzy_demo/facedetect/build/network_camera_receiver/CMakeFiles/edit_cache.dir
+/home/hongshaorou/lzy_demo/facedetect/build/network_camera_receiver/CMakeFiles/rebuild_cache.dir
+/home/hongshaorou/lzy_demo/facedetect/build/app/CMakeFiles/face_detection_app.dir
+/home/hongshaorou/lzy_demo/facedetect/build/app/CMakeFiles/edit_cache.dir
+/home/hongshaorou/lzy_demo/facedetect/build/app/CMakeFiles/rebuild_cache.dir

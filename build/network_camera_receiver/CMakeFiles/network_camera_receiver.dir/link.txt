@@ -1,0 +1,2 @@
+/usr/bin/ar qc libnetwork_camera_receiver.a CMakeFiles/network_camera_receiver.dir/src/network_camera_receiver.cpp.o
+/usr/bin/ranlib libnetwork_camera_receiver.a

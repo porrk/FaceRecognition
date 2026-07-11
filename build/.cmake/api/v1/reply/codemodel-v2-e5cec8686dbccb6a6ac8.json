@@ -1,0 +1,126 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						2,
+						3
+					],
+					"jsonFile" : "directory-.-Release-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.10"
+					},
+					"projectIndex" : 0,
+					"source" : "."
+				},
+				{
+					"build" : "libfacedetection",
+					"jsonFile" : "directory-libfacedetection-Release-850d3f1cd704b0988d2c.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.10"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "libfacedetection",
+					"targetIndexes" : 
+					[
+						1
+					]
+				},
+				{
+					"build" : "network_camera_receiver",
+					"jsonFile" : "directory-network_camera_receiver-Release-f139a8ec932a70449176.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.10"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "network_camera_receiver",
+					"targetIndexes" : 
+					[
+						2
+					]
+				},
+				{
+					"build" : "app",
+					"jsonFile" : "directory-app-Release-94c5f210ca04b1028ae5.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.10"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "app",
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"name" : "Release",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3
+					],
+					"name" : "FaceDetectionApp",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 3,
+					"id" : "face_detection_app::@5f5a17c01335469806cb",
+					"jsonFile" : "target-face_detection_app-Release-c62b37bfebe414dfbd17.json",
+					"name" : "face_detection_app",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "facedetection::@0ece3808304c45cd0ca3",
+					"jsonFile" : "target-facedetection-Release-318f1374fb40d9a50e7b.json",
+					"name" : "facedetection",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "network_camera_receiver::@9883af0ef0c4a1b6b770",
+					"jsonFile" : "target-network_camera_receiver-Release-20ca25790d17e3c9c2b5.json",
+					"name" : "network_camera_receiver",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/hongshaorou/lzy_demo/facedetect/build",
+		"source" : "/home/hongshaorou/lzy_demo/facedetect"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 3
+	}
+}

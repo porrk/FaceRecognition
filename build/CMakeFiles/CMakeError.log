@@ -1,0 +1,15 @@
+Performing C++ SOURCE FILE Test CXX_HAS_MFPU_NEON failed with the following output:
+Change Dir: /home/hongshaorou/lzy_demo/facedetect/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_a1299/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_a1299.dir/build.make CMakeFiles/cmTC_a1299.dir/build
+gmake[1]: Entering directory '/home/hongshaorou/lzy_demo/facedetect/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_a1299.dir/src.cxx.o
+/usr/bin/g++ -DCXX_HAS_MFPU_NEON  -mfpu=neon -std=gnu++11 -o CMakeFiles/cmTC_a1299.dir/src.cxx.o -c /home/hongshaorou/lzy_demo/facedetect/build/CMakeFiles/CMakeTmp/src.cxx
+g++: error: unrecognized command-line option '-mfpu=neon'
+gmake[1]: *** [CMakeFiles/cmTC_a1299.dir/build.make:78: CMakeFiles/cmTC_a1299.dir/src.cxx.o] Error 1
+gmake[1]: Leaving directory '/home/hongshaorou/lzy_demo/facedetect/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_a1299/fast] Error 2
+
+
+Source file was:
+int main() { return 0; }

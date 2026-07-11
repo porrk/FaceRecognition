@@ -1,0 +1,27 @@
+[
+{
+  "directory": "/home/hongshaorou/lzy_demo/facedetect/build/libfacedetection",
+  "command": "/usr/bin/g++ -D_ENABLE_AVX2 -Dfacedetection_EXPORTS -I/home/hongshaorou/lzy_demo/facedetect/libfacedetection/include -O3 -DNDEBUG -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -O3 -mavx2 -mfma -fopenmp -std=gnu++11 -o CMakeFiles/facedetection.dir/src/facedetectcnn.cpp.o -c /home/hongshaorou/lzy_demo/facedetect/libfacedetection/src/facedetectcnn.cpp",
+  "file": "/home/hongshaorou/lzy_demo/facedetect/libfacedetection/src/facedetectcnn.cpp"
+},
+{
+  "directory": "/home/hongshaorou/lzy_demo/facedetect/build/libfacedetection",
+  "command": "/usr/bin/g++ -D_ENABLE_AVX2 -Dfacedetection_EXPORTS -I/home/hongshaorou/lzy_demo/facedetect/libfacedetection/include -O3 -DNDEBUG -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -O3 -mavx2 -mfma -fopenmp -std=gnu++11 -o CMakeFiles/facedetection.dir/src/facedetectcnn-model.cpp.o -c /home/hongshaorou/lzy_demo/facedetect/libfacedetection/src/facedetectcnn-model.cpp",
+  "file": "/home/hongshaorou/lzy_demo/facedetect/libfacedetection/src/facedetectcnn-model.cpp"
+},
+{
+  "directory": "/home/hongshaorou/lzy_demo/facedetect/build/libfacedetection",
+  "command": "/usr/bin/g++ -D_ENABLE_AVX2 -Dfacedetection_EXPORTS -I/home/hongshaorou/lzy_demo/facedetect/libfacedetection/include -O3 -DNDEBUG -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -O3 -mavx2 -mfma -fopenmp -std=gnu++11 -o CMakeFiles/facedetection.dir/src/facedetectcnn-data.cpp.o -c /home/hongshaorou/lzy_demo/facedetect/libfacedetection/src/facedetectcnn-data.cpp",
+  "file": "/home/hongshaorou/lzy_demo/facedetect/libfacedetection/src/facedetectcnn-data.cpp"
+},
+{
+  "directory": "/home/hongshaorou/lzy_demo/facedetect/build/network_camera_receiver",
+  "command": "/usr/bin/g++  -I/home/hongshaorou/lzy_demo/facedetect/network_camera_receiver/include -isystem /usr/include/opencv4 -O3 -DNDEBUG -O3 -std=gnu++11 -o CMakeFiles/network_camera_receiver.dir/src/network_camera_receiver.cpp.o -c /home/hongshaorou/lzy_demo/facedetect/network_camera_receiver/src/network_camera_receiver.cpp",
+  "file": "/home/hongshaorou/lzy_demo/facedetect/network_camera_receiver/src/network_camera_receiver.cpp"
+},
+{
+  "directory": "/home/hongshaorou/lzy_demo/facedetect/build/app",
+  "command": "/usr/bin/g++ -DSOURCE_ROOT=\\\"/home/hongshaorou/lzy_demo/facedetect\\\" -I/home/hongshaorou/lzy_demo/facedetect/libfacedetection/include -I/home/hongshaorou/lzy_demo/facedetect/network_camera_receiver/include -isystem /usr/include/opencv4 -O3 -DNDEBUG -O3 -std=gnu++11 -o CMakeFiles/face_detection_app.dir/src/main.cpp.o -c /home/hongshaorou/lzy_demo/facedetect/app/src/main.cpp",
+  "file": "/home/hongshaorou/lzy_demo/facedetect/app/src/main.cpp"
+}
+]
